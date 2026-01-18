@@ -6,3 +6,4 @@ playwright-report/
 .extension-key.pem
 *.crx
 key.pub
+out/

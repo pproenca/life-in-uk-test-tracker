@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Life in UK Test Tracker - Marquee Tile</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #e5e5e5;
+    }
+
+    .tile {
+      width: 1400px;
+      height: 560px;
+      background: #1a1a2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 80px;
+      padding: 80px;
+    }
+
+    .left {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 24px;
+    }
+
+    .icon {
+      width: 120px;
+      height: 120px;
+      background: #3b82f6;
+      border-radius: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon svg {
+      width: 64px;
+      height: 64px;
+      color: white;
+    }
+
+    .title {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 48px;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 20px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .right {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .stats-area {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .stat-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-icon.correct {
+      background: #22c55e;
+    }
+
+    .stat-icon.incorrect {
+      background: #ef4444;
+    }
+
+    .stat-icon.total {
+      background: #3b82f6;
+    }
+
+    .stat-icon svg {
+      width: 28px;
+      height: 28px;
+      color: white;
+    }
+
+    .stat-bar {
+      width: 180px;
+      height: 12px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .stat-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+    }
+
+    .stat-bar-fill.correct {
+      width: 70%;
+      background: #22c55e;
+    }
+
+    .stat-bar-fill.incorrect {
+      width: 30%;
+      background: #ef4444;
+    }
+
+    .stat-bar-fill.total {
+      width: 100%;
+      background: #3b82f6;
+    }
+
+    .mockup {
+      background: #252542;
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 320px;
+    }
+
+    .mockup-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mockup-icon {
+      width: 32px;
+      height: 32px;
+      background: #3b82f6;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mockup-icon svg {
+      width: 18px;
+      height: 18px;
+      color: white;
+    }
+
+    .mockup-title {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .mockup-stats {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .mockup-stat {
+      text-align: center;
+    }
+
+    .mockup-stat-value {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    .mockup-stat-value.total { color: #3b82f6; }
+    .mockup-stat-value.correct { color: #22c55e; }
+    .mockup-stat-value.incorrect { color: #ef4444; }
+
+    .mockup-stat-label {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 10px;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    .mockup-progress {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .mockup-progress-fill {
+      height: 100%;
+      width: 70%;
+      background: #22c55e;
+      border-radius: 3px;
+    }
+
+    .mockup-questions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mockup-question {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+    }
+
+    .mockup-q-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mockup-q-icon.correct { background: #22c55e; }
+    .mockup-q-icon.incorrect { background: #ef4444; }
+
+    .mockup-q-icon svg {
+      width: 12px;
+      height: 12px;
+      color: white;
+    }
+
+    .mockup-q-text {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="tile">
+    <div class="left">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 11 12 14 22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+      </div>
+      <div class="title">Life in UK<br>Test Tracker</div>
+      <div class="subtitle">Track practice questions. Focus on review.</div>
+    </div>
+
+    <div class="right">
+      <div class="stats-area">
+        <div class="stat-row">
+          <div class="stat-icon correct">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="stat-bar"><div class="stat-bar-fill correct"></div></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-icon incorrect">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </div>
+          <div class="stat-bar"><div class="stat-bar-fill incorrect"></div></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-icon total">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="20" x2="12" y2="10"/>
+              <line x1="18" y1="20" x2="18" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="16"/>
+            </svg>
+          </div>
+          <div class="stat-bar"><div class="stat-bar-fill total"></div></div>
+        </div>
+      </div>
+
+      <div class="mockup">
+        <div class="mockup-header">
+          <div class="mockup-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 11 12 14 22 4"/>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+          </div>
+          <div class="mockup-title">Life in UK Test Tracker</div>
+        </div>
+        <div class="mockup-stats">
+          <div class="mockup-stat">
+            <div class="mockup-stat-value total">67</div>
+            <div class="mockup-stat-label">Total</div>
+          </div>
+          <div class="mockup-stat">
+            <div class="mockup-stat-value correct">47</div>
+            <div class="mockup-stat-label">Correct</div>
+          </div>
+          <div class="mockup-stat">
+            <div class="mockup-stat-value incorrect">20</div>
+            <div class="mockup-stat-label">Review</div>
+          </div>
+        </div>
+        <div class="mockup-progress"><div class="mockup-progress-fill"></div></div>
+        <div class="mockup-questions">
+          <div class="mockup-question">
+            <div class="mockup-q-icon correct">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <div class="mockup-q-text">Who is the head of state?</div>
+          </div>
+          <div class="mockup-question">
+            <div class="mockup-q-icon incorrect">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </div>
+            <div class="mockup-q-text">When was the Act of Union?</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
