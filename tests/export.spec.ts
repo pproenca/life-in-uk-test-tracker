@@ -180,7 +180,7 @@ test.describe('Data Export - CSV', () => {
     expect(headers).toContain('Date');
   });
 
-  test('CSV escapes quotes correctly', async ({ page, extensionId }) => {
+  test('CSV escapes quotes correctly', async ({ page }) => {
     // Add a question with quotes
     await page.evaluate(async () => {
       const sessions = [{
@@ -289,36 +289,35 @@ test.describe('Search and Filter', () => {
     await page.evaluate(() => chrome.storage.local.clear());
     await seedTestData(page, createTestSessions());
     await page.reload();
+    // Switch to Timeline tab (Sessions is default)
+    await page.getByRole('tab', { name: 'Timeline' }).click();
   });
 
   test('search filters questions by text', async ({ page }) => {
-    // Questions tab should be active by default
-    await expect(page.getByRole('tab', { name: 'Questions' })).toHaveAttribute('aria-selected', 'true');
+    // Timeline tab should be active after clicking
+    await expect(page.getByRole('tab', { name: 'Timeline' })).toHaveAttribute('aria-selected', 'true');
 
     // Get the search input
-    const searchInput = page.getByPlaceholder('Search questions...');
+    const searchInput = page.getByPlaceholder('Search timeline...');
     await expect(searchInput).toBeVisible();
 
     // Search for "capital"
     await searchInput.fill('capital');
 
-    // Wait for debounced filter to apply
-    await page.waitForTimeout(200);
-
-    // Should show only the capital question
-    const visibleQuestions = page.locator('.question-item:visible');
+    // Should show only the capital question (assertion auto-waits for debounce)
+    const visibleQuestions = page.locator('.question-item').filter({ visible: true });
     await expect(visibleQuestions).toHaveCount(1);
     await expect(visibleQuestions.first()).toContainText('capital');
   });
 
   test('search is case insensitive', async ({ page }) => {
-    const searchInput = page.getByPlaceholder('Search questions...');
+    const searchInput = page.getByPlaceholder('Search timeline...');
 
     // Search with different cases
     await searchInput.fill('MAGNA CARTA');
-    await page.waitForTimeout(200);
 
-    const visibleQuestions = page.locator('.question-item:visible');
+    // Assertion auto-waits for debounce
+    const visibleQuestions = page.locator('.question-item').filter({ visible: true });
     await expect(visibleQuestions).toHaveCount(1);
     await expect(visibleQuestions.first()).toContainText('Magna Carta');
   });
@@ -328,7 +327,7 @@ test.describe('Search and Filter', () => {
     await page.getByRole('button', { name: 'Correct', exact: true }).click();
 
     // Should show only correct questions (1 out of 3)
-    const visibleQuestions = page.locator('.question-item:visible');
+    const visibleQuestions = page.locator('.question-item').filter({ visible: true });
     await expect(visibleQuestions).toHaveCount(1);
     await expect(visibleQuestions.first()).toHaveClass(/correct/);
   });
@@ -338,7 +337,7 @@ test.describe('Search and Filter', () => {
     await page.getByRole('button', { name: 'Incorrect', exact: true }).click();
 
     // Should show only incorrect questions (2 out of 3)
-    const visibleQuestions = page.locator('.question-item:visible');
+    const visibleQuestions = page.locator('.question-item').filter({ visible: true });
     await expect(visibleQuestions).toHaveCount(2);
 
     // All visible should have incorrect class
@@ -351,13 +350,13 @@ test.describe('Search and Filter', () => {
   test('filter All shows all questions', async ({ page }) => {
     // First filter to Correct
     await page.getByRole('button', { name: 'Correct', exact: true }).click();
-    await expect(page.locator('.question-item:visible')).toHaveCount(1);
+    await expect(page.locator('.question-item').filter({ visible: true })).toHaveCount(1);
 
     // Then click All
     await page.getByRole('button', { name: 'All', exact: true }).click();
 
     // Should show all 3 questions
-    await expect(page.locator('.question-item:visible')).toHaveCount(3);
+    await expect(page.locator('.question-item').filter({ visible: true })).toHaveCount(3);
   });
 
   test('combined search and filter', async ({ page }) => {
@@ -365,12 +364,11 @@ test.describe('Search and Filter', () => {
     await page.getByRole('button', { name: 'Incorrect', exact: true }).click();
 
     // Then search for "UK" (should match the multi-select question)
-    const searchInput = page.getByPlaceholder('Search questions...');
+    const searchInput = page.getByPlaceholder('Search timeline...');
     await searchInput.fill('UK');
-    await page.waitForTimeout(200);
 
-    // Should show only 1 question (incorrect + contains "UK")
-    const visibleQuestions = page.locator('.question-item:visible');
+    // Should show only 1 question (incorrect + contains "UK") - assertion auto-waits
+    const visibleQuestions = page.locator('.question-item').filter({ visible: true });
     await expect(visibleQuestions).toHaveCount(1);
     await expect(visibleQuestions.first()).toContainText('UK');
     await expect(visibleQuestions.first()).toHaveClass(/incorrect/);
@@ -397,15 +395,14 @@ test.describe('Search and Filter', () => {
 
   test('test headers hide when no matching questions', async ({ page }) => {
     // Search for something that won't match
-    const searchInput = page.getByPlaceholder('Search questions...');
+    const searchInput = page.getByPlaceholder('Search timeline...');
     await searchInput.fill('xyznonexistent');
-    await page.waitForTimeout(200);
 
-    // No questions should be visible
-    await expect(page.locator('.question-item:visible')).toHaveCount(0);
+    // No questions should be visible - assertion auto-waits for debounce
+    await expect(page.locator('.question-item').filter({ visible: true })).toHaveCount(0);
 
     // Test headers should also be hidden
-    const visibleHeaders = page.locator('.test-header:visible');
+    const visibleHeaders = page.locator('.test-header').filter({ visible: true });
     await expect(visibleHeaders).toHaveCount(0);
   });
 });
@@ -506,10 +503,7 @@ test.describe('UI Stats Display', () => {
       await chrome.storage.local.set({ testSessions: sessions });
     });
 
-    // Wait for storage change listener to trigger reload
-    await page.waitForTimeout(500);
-
-    // Stats should be updated
+    // Stats should be updated - assertions auto-wait for storage change listener
     await expect(page.getByTestId('total-count')).toHaveText('4');
     await expect(page.getByTestId('correct-count')).toHaveText('2');
     await expect(page.locator('#success-rate-percent')).toHaveText('50');

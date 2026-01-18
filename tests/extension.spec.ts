@@ -14,22 +14,22 @@ test.describe('Extension UI', () => {
 
     // Verify tabs are present using role-based selectors
     await expect(page.getByRole('tab', { name: 'Sessions' })).toBeVisible();
-    await expect(page.getByRole('tab', { name: 'Questions' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Timeline' })).toBeVisible();
   });
 
   test('popup tabs switch correctly', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
 
-    // Questions tab should be active by default (check aria-selected attribute)
-    await expect(page.getByRole('tab', { name: 'Questions' })).toHaveAttribute('aria-selected', 'true');
-    await expect(page.getByRole('tabpanel', { name: 'Questions' })).toBeVisible();
-
-    // Click Sessions tab using locator
-    await page.getByRole('tab', { name: 'Sessions' }).click();
-
-    // Sessions tab should now be active
+    // Sessions tab should be active by default (check aria-selected attribute)
     await expect(page.getByRole('tab', { name: 'Sessions' })).toHaveAttribute('aria-selected', 'true');
     await expect(page.getByRole('tabpanel', { name: 'Sessions' })).toBeVisible();
+
+    // Click Timeline tab using locator
+    await page.getByRole('tab', { name: 'Timeline' }).click();
+
+    // Timeline tab should now be active
+    await expect(page.getByRole('tab', { name: 'Timeline' })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('tabpanel', { name: 'Timeline' })).toBeVisible();
   });
 
   test('sidepanel renders correctly', async ({ page, extensionId }) => {
@@ -41,8 +41,8 @@ test.describe('Extension UI', () => {
     // Verify stats section
     await expect(page.locator('.stats')).toBeVisible();
 
-    // Verify empty state message in the active Questions tab
-    await expect(page.locator('#questions-content .empty-state')).toBeVisible();
+    // Verify empty state message in the active Sessions tab
+    await expect(page.locator('#sessions-content .empty-state')).toBeVisible();
   });
 
   test('export buttons are visible in popup', async ({ page, extensionId }) => {
@@ -195,10 +195,10 @@ test.describe('Accessibility', () => {
     // Check tabs have proper ARIA roles
     await expect(page.locator('.tabs')).toHaveAttribute('role', 'tablist');
     await expect(page.getByRole('tab', { name: 'Sessions' })).toHaveAttribute('role', 'tab');
-    await expect(page.getByRole('tab', { name: 'Questions' })).toHaveAttribute('role', 'tab');
+    await expect(page.getByRole('tab', { name: 'Timeline' })).toHaveAttribute('role', 'tab');
 
     // Check tab panels have proper ARIA roles
-    // Note: Sessions panel is initially hidden (aria-hidden="true"), so we use ID selector
+    // Note: Timeline panel is initially hidden (aria-hidden="true"), so we use ID selector
     await expect(page.locator('#sessions-content')).toHaveAttribute('role', 'tabpanel');
     await expect(page.locator('#questions-content')).toHaveAttribute('role', 'tabpanel');
   });
@@ -214,15 +214,15 @@ test.describe('Accessibility', () => {
   test('tabs are keyboard accessible', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
 
-    // Questions tab should be focusable initially (tabindex="0")
-    await expect(page.getByRole('tab', { name: 'Questions' })).toHaveAttribute('tabindex', '0');
-    await expect(page.getByRole('tab', { name: 'Sessions' })).toHaveAttribute('tabindex', '-1');
+    // Sessions tab should be focusable initially (tabindex="0")
+    await expect(page.getByRole('tab', { name: 'Sessions' })).toHaveAttribute('tabindex', '0');
+    await expect(page.getByRole('tab', { name: 'Timeline' })).toHaveAttribute('tabindex', '-1');
 
-    // Focus and activate Sessions tab
-    await page.getByRole('tab', { name: 'Sessions' }).focus();
+    // Focus and activate Timeline tab
+    await page.getByRole('tab', { name: 'Timeline' }).focus();
     await page.keyboard.press('Enter');
 
-    // Sessions tab should now be selected
-    await expect(page.getByRole('tab', { name: 'Sessions' })).toHaveAttribute('aria-selected', 'true');
+    // Timeline tab should now be selected
+    await expect(page.getByRole('tab', { name: 'Timeline' })).toHaveAttribute('aria-selected', 'true');
   });
 });

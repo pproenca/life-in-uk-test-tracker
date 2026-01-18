@@ -56,7 +56,7 @@ test.describe('Session Management', () => {
     expect(data.testSessions[0].questions).toHaveLength(1);
   });
 
-  test('session within 2-hour window should reuse session (simulated)', async ({ page, extensionId }) => {
+  test('session within 2-hour window should reuse session (simulated)', async ({ page }) => {
     const oneHourAgo = Date.now() - (60 * 60 * 1000);
 
     // Pre-seed with a session from 1 hour ago
@@ -91,7 +91,7 @@ test.describe('Session Management', () => {
     expect(hoursDiff).toBeLessThan(2);
   });
 
-  test('session after 2-hour window should create new session (simulated)', async ({ page, extensionId }) => {
+  test('session after 2-hour window should create new session (simulated)', async ({ page }) => {
     const threeHoursAgo = Date.now() - (3 * 60 * 60 * 1000);
 
     // Pre-seed with an old session (3 hours ago)
@@ -153,7 +153,7 @@ test.describe('Session Management', () => {
     expect(data.testSessions).toHaveLength(2);
   });
 
-  test('different URLs create separate sessions', async ({ page, extensionId }) => {
+  test('different URLs create separate sessions', async ({ page }) => {
     const now = Date.now();
 
     await page.evaluate(async (timestamp) => {
@@ -194,7 +194,7 @@ test.describe('Question Deduplication', () => {
     await page.evaluate(() => chrome.storage.local.clear());
   });
 
-  test('updates existing question when re-answered by question number', async ({ page, extensionId }) => {
+  test('updates existing question when re-answered by question number', async ({ page }) => {
     const now = Date.now();
 
     // Seed with initial question (incorrect)
@@ -265,7 +265,7 @@ test.describe('Question Deduplication', () => {
     expect(data.testSessions[0]._stats.incorrect).toBe(0);
   });
 
-  test('does not duplicate questions with same number', async ({ page, extensionId }) => {
+  test('does not duplicate questions with same number', async ({ page }) => {
     const now = Date.now();
 
     // Seed with 3 questions
@@ -315,7 +315,7 @@ test.describe('Question Deduplication', () => {
     expect(q2.isCorrect).toBe(true);
   });
 
-  test('incremental stats update works correctly', async ({ page, extensionId }) => {
+  test('incremental stats update works correctly', async ({ page }) => {
     const now = Date.now();
 
     // Seed with initial data
