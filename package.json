@@ -1,0 +1,18 @@
+{
+  "name": "life-in-uk-test-tracker",
+  "version": "1.0.0",
+  "description": "A Chrome extension that tracks your quiz answers on the Life in the UK Test practice website (lifeintheuktestweb.co.uk) for later analysis with Claude or other AI assistants.",
+  "main": "background.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
+}

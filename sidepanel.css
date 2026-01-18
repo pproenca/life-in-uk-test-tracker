@@ -1,0 +1,7 @@
+/* Life in UK Test Tracker - Side Panel Styles
+ * Imports shared styles and applies sidepanel-specific overrides */
+
+@import url('shared.css');
+
+/* Side panel uses default CSS custom properties from shared.css
+ * which are optimized for the side panel (full width, sticky elements, etc.) */

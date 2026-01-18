@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Life in UK Test Tracker",
+  "version": "1.0",
+  "description": "Tracks your quiz answers on Life in the UK Test practice website for later analysis",
+  "permissions": [
+    "storage",
+    "sidePanel",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://lifeintheuktestweb.co.uk/*"
+  ],
+  "action": {
+    "default_title": "Life in UK Test Tracker",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "offline_enabled": true,
+  "content_scripts": [
+    {
+      "matches": ["https://lifeintheuktestweb.co.uk/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

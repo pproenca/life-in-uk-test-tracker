@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>UK Test Tracker</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div class="header">
+    <h1>Life in UK Test Tracker</h1>
+    <p>Track your practice questions for analysis</p>
+  </div>
+
+  <!-- Storage Quota Warning Banner -->
+  <div class="storage-warning-banner" id="storage-warning-banner" role="alert" aria-live="polite" style="display: none;">
+    <div class="storage-warning-content">
+      <span class="storage-warning-icon" aria-hidden="true">⚠️</span>
+      <span class="storage-warning-text" id="storage-warning-text">Storage nearly full</span>
+    </div>
+    <div class="storage-usage-bar">
+      <div class="storage-usage-fill" id="storage-usage-fill"></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-box total">
+      <div class="stat-number" id="total-count" data-testid="total-count">0</div>
+      <div class="stat-label">Total</div>
+    </div>
+    <div class="stat-box correct">
+      <div class="stat-number" id="correct-count" data-testid="correct-count">0</div>
+      <div class="stat-label">Correct</div>
+    </div>
+    <div class="stat-box incorrect">
+      <div class="stat-number" id="incorrect-count" data-testid="incorrect-count">0</div>
+      <div class="stat-label">Incorrect</div>
+    </div>
+  </div>
+  <div class="success-rate" id="success-rate-container" style="display: none;">
+    <div class="success-rate-bar">
+      <div class="success-rate-fill" id="success-rate-fill"></div>
+    </div>
+    <div class="success-rate-text"><span id="success-rate-percent">0</span>% success rate</div>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Content views">
+    <button class="tab active" role="tab" data-tab="sessions" id="tab-sessions" aria-controls="sessions-content" aria-selected="true" tabindex="0">Sessions</button>
+    <button class="tab" role="tab" data-tab="questions" id="tab-questions" aria-controls="questions-content" aria-selected="false" tabindex="-1">Timeline</button>
+  </div>
+
+  <div id="sessions-content" class="tab-content active" role="tabpanel" aria-labelledby="tab-sessions" aria-hidden="false">
+    <div class="actions">
+      <button class="btn-primary" id="export-btn">Export Data (JSON)</button>
+      <button class="btn-secondary" id="export-csv-btn">Export for Claude (CSV)</button>
+      <button class="btn-danger" id="clear-btn">Clear All Data</button>
+    </div>
+    <div class="sessions-list" id="sessions-list">
+      <div class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <p><strong>No data yet</strong></p>
+        <p class="empty-hint">Visit a practice website and answer some questions. This extension automatically tracks your answers when you click "Check".</p>
+        <p class="empty-hint"><strong>Practice sites:</strong></p>
+        <div class="practice-links">
+          <a href="https://lifeintheuktestweb.co.uk/test-1/" target="_blank">lifeintheuktestweb.co.uk</a>
+          <a href="https://lifeintheuktestpractice.co.uk/" target="_blank">lifeintheuktestpractice.co.uk</a>
+          <a href="https://theuktest.com/" target="_blank">theuktest.com</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="questions-content" class="tab-content" role="tabpanel" aria-labelledby="tab-questions" aria-hidden="true">
+    <div class="filter-bar">
+      <div id="session-filter-indicator" class="session-filter-indicator" style="display: none;">
+        <span id="session-filter-name"></span>
+        <button class="btn-link" id="clear-session-filter">Show all</button>
+      </div>
+      <input type="search" class="search-input" id="question-search" placeholder="Search timeline..." aria-label="Search timeline">
+      <div class="filter-buttons">
+        <button class="filter-btn active" data-filter="all" aria-pressed="true">All</button>
+        <button class="filter-btn" data-filter="correct" aria-pressed="false">Correct</button>
+        <button class="filter-btn" data-filter="incorrect" aria-pressed="false">Incorrect</button>
+      </div>
+    </div>
+    <div class="question-list" id="question-list">
+      <div class="empty-state">
+        <p><strong>No questions tracked yet</strong></p>
+        <p class="empty-hint">Answer questions on the practice website and they'll appear here for review.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal-overlay" id="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <div class="modal-title" id="modal-title">Clear All Data?</div>
+      <div class="modal-message" id="modal-message">This will delete all tracked sessions and questions. You'll have 30 seconds to undo this action.</div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="modal-cancel">Cancel</button>
+        <button class="btn-danger" id="modal-confirm">Clear Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Undo Toast -->
+  <div class="undo-toast" id="undo-toast" role="alert" aria-live="assertive">
+    <span class="toast-message">Data cleared</span>
+    <button class="undo-btn" id="undo-btn">Undo</button>
+    <span class="toast-timer" id="undo-timer">30</span>
+  </div>
+
+  <!-- Success Toast -->
+  <div class="success-toast" id="success-toast" role="status" aria-live="polite"></div>
+
+  <script src="shared.js"></script>
+  <script src="entry.js"></script>
+</body>
+</html>

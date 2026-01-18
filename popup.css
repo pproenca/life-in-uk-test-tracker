@@ -1,0 +1,53 @@
+/* Life in UK Test Tracker - Popup-specific Styles
+ * Overrides for the extension popup window */
+
+@import url('shared.css');
+
+/* Popup-specific CSS custom property overrides */
+:root {
+  --body-width: 400px;
+  --body-min-height: 300px;
+  --header-font-size: 18px;
+  --stat-number-size: 24px;
+  --list-max-height: 300px;
+  --question-list-max-height: 350px;
+  --question-text-size: 13px;
+  --tab-padding: 12px;
+  --tab-font-size: 13px;
+  --list-padding: 16px;
+  --header-sticky: static;
+  --tabs-sticky: static;
+  --tabs-top: 0;
+}
+
+/* Popup doesn't need tab hover effect */
+.tab:hover {
+  background: transparent;
+}
+
+/* Larger empty state icon for popup */
+.empty-state svg {
+  width: 48px;
+  height: 48px;
+}
+
+/* Larger stats padding for popup */
+.stats {
+  padding: 16px;
+}
+
+/* Session item adjustments for popup */
+.session-item h3 {
+  font-size: 14px;
+}
+
+/* Popup uses full button padding */
+button {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.actions {
+  padding: 16px;
+}

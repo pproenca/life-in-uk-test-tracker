@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test 1 - Life in the UK Practice Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .main-content {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .container_question {
+      display: none;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .container_question.active {
+      display: block;
+    }
+    .question {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .question-progress {
+      color: #666;
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      padding: 10px;
+      margin: 5px 0;
+      background: #f9f9f9;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    label:hover {
+      background: #f0f0f0;
+    }
+    label.good {
+      background: #d4edda;
+      border-color: #28a745;
+    }
+    label.bad {
+      background: #f8d7da;
+      border-color: #dc3545;
+    }
+    input[type="radio"],
+    input[type="checkbox"] {
+      margin-right: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px 10px 0;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+    }
+    button.check {
+      background: #007bff;
+      color: white;
+    }
+    button.next {
+      background: #28a745;
+      color: white;
+    }
+    .message {
+      display: none;
+      margin-top: 15px;
+      padding: 10px;
+      background: #e7f3ff;
+      border-radius: 4px;
+    }
+    .message.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>Life in the UK Practice Test</h1>
+
+  <div class="main-content">
+    <!-- Question 1: Single-choice (correct answer is "London") -->
+    <div class="container_question active" data-question-number="1">
+      <div class="question-progress">Question 1 of 5</div>
+      <div class="question">What is the capital city of the United Kingdom?</div>
+      <label><input type="radio" name="q1" value="Manchester"> Manchester</label>
+      <label><input type="radio" name="q1" value="Birmingham"> Birmingham</label>
+      <label><input type="radio" name="q1" value="London"> London</label>
+      <label><input type="radio" name="q1" value="Edinburgh"> Edinburgh</label>
+      <button class="check">Check</button>
+      <button class="next" style="display:none">Next</button>
+      <div class="message">London has been the capital since the Roman times.</div>
+    </div>
+
+    <!-- Question 2: Single-choice (correct answer is "1215") -->
+    <div class="container_question" data-question-number="2">
+      <div class="question-progress">Question 2 of 5</div>
+      <div class="question">When was the Magna Carta signed?</div>
+      <label><input type="radio" name="q2" value="1066"> 1066</label>
+      <label><input type="radio" name="q2" value="1215"> 1215</label>
+      <label><input type="radio" name="q2" value="1485"> 1485</label>
+      <label><input type="radio" name="q2" value="1642"> 1642</label>
+      <button class="check">Check</button>
+      <button class="next" style="display:none">Next</button>
+      <div class="message">The Magna Carta was signed in 1215 at Runnymede.</div>
+    </div>
+
+    <!-- Question 3: Multi-select (correct answers are "England", "Scotland", "Wales", "Northern Ireland") -->
+    <div class="container_question" data-question-number="3">
+      <div class="question-progress">Question 3 of 5</div>
+      <div class="question">Which of the following are countries within the United Kingdom? (Select all that apply)</div>
+      <label><input type="checkbox" name="q3" value="England"> England</label>
+      <label><input type="checkbox" name="q3" value="Scotland"> Scotland</label>
+      <label><input type="checkbox" name="q3" value="Wales"> Wales</label>
+      <label><input type="checkbox" name="q3" value="Northern Ireland"> Northern Ireland</label>
+      <label><input type="checkbox" name="q3" value="Republic of Ireland"> Republic of Ireland</label>
+      <button class="check">Check</button>
+      <button class="next" style="display:none">Next</button>
+      <div class="message">The UK consists of England, Scotland, Wales, and Northern Ireland.</div>
+    </div>
+
+    <!-- Question 4: Single-choice (correct answer is "Elizabeth II") -->
+    <div class="container_question" data-question-number="4">
+      <div class="question-progress">Question 4 of 5</div>
+      <div class="question">Who was the longest-reigning British monarch?</div>
+      <label><input type="radio" name="q4" value="Victoria"> Queen Victoria</label>
+      <label><input type="radio" name="q4" value="Elizabeth II"> Queen Elizabeth II</label>
+      <label><input type="radio" name="q4" value="George III"> King George III</label>
+      <label><input type="radio" name="q4" value="Henry VIII"> King Henry VIII</label>
+      <button class="check">Check</button>
+      <button class="next" style="display:none">Next</button>
+      <div class="message">Queen Elizabeth II reigned for over 70 years.</div>
+    </div>
+
+    <!-- Question 5: Single-choice (correct answer is "1945") -->
+    <div class="container_question" data-question-number="5">
+      <div class="question-progress">Question 5 of 5</div>
+      <div class="question">When did World War II end?</div>
+      <label><input type="radio" name="q5" value="1943"> 1943</label>
+      <label><input type="radio" name="q5" value="1944"> 1944</label>
+      <label><input type="radio" name="q5" value="1945"> 1945</label>
+      <label><input type="radio" name="q5" value="1946"> 1946</label>
+      <button class="check">Check</button>
+      <button class="next" style="display:none">Next</button>
+      <div class="message">World War II ended in 1945 with the surrender of Germany and Japan.</div>
+    </div>
+  </div>
+
+  <script>
+    // Mock quiz behavior - simulates the real quiz site
+    // This script handles Check button clicks and reveals answers
+
+    // Define correct answers
+    const correctAnswers = {
+      q1: 'London',
+      q2: '1215',
+      q3: ['England', 'Scotland', 'Wales', 'Northern Ireland'],
+      q4: 'Elizabeth II',
+      q5: '1945'
+    };
+
+    // Handle Check button clicks
+    document.querySelectorAll('.check').forEach(button => {
+      button.addEventListener('click', function() {
+        const container = this.closest('.container_question');
+        const questionNum = container.dataset.questionNumber;
+        const correctAnswer = correctAnswers['q' + questionNum];
+        const isMultiSelect = Array.isArray(correctAnswer);
+
+        if (isMultiSelect) {
+          // Multi-select: mark all correct answers as good, wrong selections as bad
+          const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+          checkboxes.forEach(checkbox => {
+            const label = checkbox.closest('label');
+            if (correctAnswer.includes(checkbox.value)) {
+              label.classList.add('good');
+            }
+            if (checkbox.checked && !correctAnswer.includes(checkbox.value)) {
+              label.classList.add('bad');
+            }
+          });
+        } else {
+          // Single-select: mark correct answer as good, wrong selection as bad
+          const radios = container.querySelectorAll('input[type="radio"]');
+          radios.forEach(radio => {
+            const label = radio.closest('label');
+            if (radio.value === correctAnswer) {
+              label.classList.add('good');
+            }
+            if (radio.checked && radio.value !== correctAnswer) {
+              label.classList.add('bad');
+            }
+          });
+        }
+
+        // Show next button and message
+        container.querySelector('.next').style.display = 'inline-block';
+        container.querySelector('.message').classList.add('show');
+
+        // Hide check button
+        this.style.display = 'none';
+      });
+    });
+
+    // Handle Next button clicks
+    document.querySelectorAll('.next').forEach(button => {
+      button.addEventListener('click', function() {
+        const currentContainer = this.closest('.container_question');
+        const nextContainer = currentContainer.nextElementSibling;
+
+        if (nextContainer && nextContainer.classList.contains('container_question')) {
+          currentContainer.classList.remove('active');
+          nextContainer.classList.add('active');
+        }
+      });
+    });
+
+    // Utility function for tests to programmatically select an answer
+    window.selectAnswer = function(questionNum, answerValue) {
+      const container = document.querySelector(`.container_question[data-question-number="${questionNum}"]`);
+      if (!container) return false;
+
+      const input = container.querySelector(`input[value="${answerValue}"]`);
+      if (!input) return false;
+
+      input.checked = true;
+      return true;
+    };
+
+    // Utility function for tests to click Check button
+    window.clickCheck = function(questionNum) {
+      const container = document.querySelector(`.container_question[data-question-number="${questionNum}"]`);
+      if (!container) return false;
+
+      const checkBtn = container.querySelector('.check');
+      if (!checkBtn) return false;
+
+      checkBtn.click();
+      return true;
+    };
+
+    // Utility function for tests to move to next question
+    window.goToNextQuestion = function() {
+      const activeContainer = document.querySelector('.container_question.active');
+      if (!activeContainer) return false;
+
+      const nextBtn = activeContainer.querySelector('.next');
+      if (!nextBtn || nextBtn.style.display === 'none') return false;
+
+      nextBtn.click();
+      return true;
+    };
+
+    // Utility function to reset all questions to initial state
+    window.resetQuiz = function() {
+      document.querySelectorAll('.container_question').forEach((container, index) => {
+        container.classList.toggle('active', index === 0);
+        container.querySelectorAll('label').forEach(label => {
+          label.classList.remove('good', 'bad');
+        });
+        container.querySelectorAll('input').forEach(input => {
+          input.checked = false;
+        });
+        container.querySelector('.check').style.display = 'inline-block';
+        container.querySelector('.next').style.display = 'none';
+        container.querySelector('.message').classList.remove('show');
+      });
+    };
+  </script>
+</body>
+</html>
