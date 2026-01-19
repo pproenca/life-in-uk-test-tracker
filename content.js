@@ -8,6 +8,9 @@
   const STORAGE_QUOTA_WARNING_BYTES = 8 * 1024 * 1024; // 8MB warning threshold
   const STORAGE_QUOTA_LIMIT_BYTES = 10 * 1024 * 1024;  // 10MB hard limit
 
+  // Session timeout constant
+  const SESSION_TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 hours
+
   // Shadow DOM container for CSS isolation
   let shadowHost = null;
   let shadowRoot = null;
@@ -115,7 +118,7 @@
     return { host: shadowHost, root: shadowRoot, notification: notificationElement };
   }
 
-  // FIX: URL normalization to prevent duplicate sessions from trailing slashes/query params/fragments
+  // Normalize URL to prevent duplicate sessions from trailing slashes/query params/fragments
   function normalizeUrl(urlString) {
     try {
       const url = new URL(urlString);
@@ -126,7 +129,7 @@
     }
   }
 
-  // FIX: Text normalization to prevent duplicates from whitespace differences
+  // Normalize text to prevent duplicates from whitespace differences
   function normalizeText(text) {
     return (text || '').trim().replace(/\s+/g, ' ').toLowerCase();
   }
@@ -135,15 +138,14 @@
   let currentTestUrl = normalizeUrl(window.location.href);
   let testName = document.title.match(/Test\s*\d+/i)?.[0] || document.querySelector('h1')?.textContent?.trim() || 'Unknown Test';
 
-  // Create a unique session ID based on URL and page load time
-  // FIX #2: This ID is now used for session matching to prevent multi-tab collision
+  // Create a unique session ID based on URL and page load time (prevents multi-tab collision)
   const sessionId = `${currentTestUrl}_${Date.now()}`;
   let sessionStartTime = new Date().toISOString();
 
   // AbortController for cleanup of event listeners
   const abortController = new AbortController();
 
-  // FIX: Check if extension context is still valid (handles extension reload/update)
+  // Check if extension context is still valid (handles extension reload/update)
   function isExtensionContextValid() {
     try {
       return !!chrome.runtime?.id;
@@ -152,7 +154,7 @@
     }
   }
 
-  // FIX: Wrapper for storage operations with context validation
+  // Wrapper for storage operations with context validation
   function safeStorageGet(keys) {
     return new Promise((resolve, reject) => {
       if (!isExtensionContextValid()) {
@@ -218,18 +220,18 @@
   // Reference to MutationObserver for cleanup
   let mutationObserver = null;
 
-  // FIX #5: Track observer timeout for cleanup
+  // Track observer timeout for cleanup
   let observerTimeout = null;
 
   // Save queue to prevent race conditions in storage operations
   let saveQueue = Promise.resolve();
 
-  // FIX #8: Unified debounce mechanism (consolidate competing timers)
+  // Unified debounce mechanism for save operations
   let pendingSave = null;
   let saveTimeout = null;
-  const DEBOUNCE_DELAY = 300; // Single consolidated debounce delay
+  const DEBOUNCE_DELAY = 300;
 
-  // FIX #6: Store message listener reference for cleanup
+  // Store message listener reference for cleanup
   let messageListener = null;
 
   // PERF: Session index maps for O(1) lookups (replaces O(n) findIndex)
@@ -283,7 +285,7 @@
 
   function trimCaches() {
     // Trim session index maps if they grow too large
-    // FIX: Clear both maps together to prevent desync
+    // Clear both maps together to prevent desync
     if (sessionIndexById.size > MAX_CACHED_SESSIONS * 2) {
       // Clear both maps and let them rebuild on next storage read
       // This is safer than partial eviction which could leave maps inconsistent
@@ -298,16 +300,16 @@
     }
   }
 
-  // Initialize (reduced logging for production - FIX #25)
+  // Initialize
   console.log('[UK Test Tracker] Extension loaded');
 
-  // FIX #4: Check storage quota before saving
+  // Check storage quota before saving
   async function checkStorageQuota() {
     return new Promise((resolve) => {
       chrome.storage.local.getBytesInUse(null, function(bytesInUse) {
         if (chrome.runtime.lastError) {
           console.error('[UK Test Tracker] Quota check error:', chrome.runtime.lastError);
-          // FIX: Return ok: false when quota check errors to prevent potentially corrupted saves
+          // Return ok: false when quota check errors to prevent potentially corrupted saves
           resolve({ ok: false, bytesInUse: -1, error: chrome.runtime.lastError.message });
           return;
         }
@@ -358,6 +360,26 @@
     }, 5000);
   }
 
+  // Helper function to determine if user's answer is correct
+  function determineCorrectness(userAnswers, correctAnswers, isMultiSelect, hasBadAnswer) {
+    if (userAnswers.length > 0 && correctAnswers.length > 0) {
+      if (isMultiSelect) {
+        // For multi-select: must have all correct and no wrong
+        const userSet = new Set(userAnswers);
+        const correctSet = new Set(correctAnswers);
+        return userSet.size === correctSet.size &&
+               [...userSet].every(a => correctSet.has(a)) &&
+               !hasBadAnswer;
+      } else {
+        return userAnswers[0] === correctAnswers[0];
+      }
+    } else if (userAnswers.length === 0 && correctAnswers.length > 0) {
+      // User didn't answer but correct answers exist
+      return false;
+    }
+    return null;
+  }
+
   // Function to extract question data from a question container
   function extractQuestionData(container) {
     const questionText = container.querySelector('.question')?.textContent?.trim() ||
@@ -370,7 +392,7 @@
     // Get all labels (answer options)
     const labels = container.querySelectorAll('label');
 
-    // FIX #18: Better multi-select detection - only check inputs within answer labels
+    // Better multi-select detection - only check inputs within answer labels
     const answerInputs = container.querySelectorAll('label input');
     const isMultiSelect = Array.from(answerInputs).some(input => input.type === 'checkbox');
 
@@ -410,7 +432,7 @@
       }
     });
 
-    // FIX #19: For single-select questions - only assume correct if good class present AND user actually selected
+    // For single-select: only assume correct if good class present AND user actually selected
     const hasBadAnswer = container.querySelector('label.bad');
     const hasGoodAnswer = container.querySelector('label.good');
     if (!isMultiSelect && !hasBadAnswer && hasGoodAnswer && correctAnswers.length > 0) {
@@ -427,22 +449,7 @@
     const correctAnswer = correctAnswers.length > 1 ? correctAnswers.join('; ') : correctAnswers[0] || null;
 
     // Determine if user was correct
-    let isCorrect = null;
-    if (userAnswers.length > 0 && correctAnswers.length > 0) {
-      if (isMultiSelect) {
-        // For multi-select: must have all correct and no wrong
-        const userSet = new Set(userAnswers);
-        const correctSet = new Set(correctAnswers);
-        isCorrect = userSet.size === correctSet.size &&
-                   [...userSet].every(a => correctSet.has(a)) &&
-                   !hasBadAnswer;
-      } else {
-        isCorrect = userAnswers[0] === correctAnswers[0];
-      }
-    } else if (userAnswers.length === 0 && correctAnswers.length > 0) {
-      // User didn't answer but correct answers exist
-      isCorrect = false;
-    }
+    const isCorrect = determineCorrectness(userAnswers, correctAnswers, isMultiSelect, hasBadAnswer);
 
     // Get explanation if available
     const explanation = container.querySelector('.message')?.textContent?.trim() || '';
@@ -476,18 +483,16 @@
 
     const questionData = extractQuestionData(activeContainer);
 
-    // FIX #20: Better question number detection - use data attributes first, then pattern
+    // Question number detection: data attributes first, then pattern matching
     const questionNumAttr = activeContainer.dataset?.questionNumber || activeContainer.dataset?.question;
     if (questionNumAttr) {
-      // FIX: Added radix parameter to parseInt
       questionData.questionNumber = parseInt(questionNumAttr, 10);
     } else {
-      // Look for "Question X of Y" pattern more specifically
+      // Look for "Question X of Y" pattern
       const progressEl = document.querySelector('.question-progress, .progress-text, [class*="progress"]');
       const searchText = progressEl?.textContent || '';
       const questionMatch = searchText.match(/Question\s+(\d+)\s+of\s+(\d+)/i);
       if (questionMatch) {
-        // FIX: Added radix parameter to parseInt
         questionData.questionNumber = parseInt(questionMatch[1], 10);
         questionData.totalQuestions = parseInt(questionMatch[2], 10);
       } else {
@@ -503,22 +508,21 @@
 
   // Function to save data to Chrome storage (queued to prevent race conditions)
   async function saveToStorage(data) {
-    // FIX: Check extension context before any storage operations
+    // Check extension context before any storage operations
     if (!isExtensionContextValid()) {
       cleanup();
       return;
     }
 
-    // FIX #4: Check quota before saving
+    // Check quota before saving
     const quotaCheck = await checkStorageQuota();
     if (!quotaCheck.ok) {
       console.error('[UK Test Tracker] Cannot save - quota exceeded');
       return;
     }
 
-    // FIX #1: Chain save operation and properly recover on error
+    // Chain save operation and recover on error
     saveQueue = saveQueue.then(async () => {
-      // FIX: Use safe storage wrapper with context validation
       const result = await safeStorageGet(['testSessions']);
       if (result === null) {
         // Context invalidated, cleanup already called
@@ -527,8 +531,7 @@
 
       let sessions = result.testSessions || [];
 
-      // FIX: Always rebuild index maps after storage read to handle concurrent tab modifications
-      // This ensures indices match actual array positions even if another tab added/removed sessions
+      // Rebuild index maps after storage read to handle concurrent tab modifications
       if (sessions.length > 0) {
         rebuildSessionIndex(sessions);
       } else {
@@ -542,7 +545,7 @@
       if (sessionIndex === -1) {
         // PERF: O(1) lookup by URL for backwards compatibility
         const urlEntry = sessionIndexByUrl.get(currentTestUrl);
-        if (urlEntry && (Date.now() - new Date(urlEntry.startTime).getTime()) < 7200000) {
+        if (urlEntry && (Date.now() - new Date(urlEntry.startTime).getTime()) < SESSION_TIMEOUT_MS) {
           sessionIndex = urlEntry.index;
         }
       }
@@ -620,7 +623,6 @@
       // Update the session in the array
       sessions[sessionIndex] = currentSession;
 
-      // FIX: Use safe storage wrapper with context validation
       const saved = await safeStorageSet({ testSessions: sessions });
       if (!saved) {
         // Context invalidated, cleanup already called
@@ -637,7 +639,7 @@
       // PERF: Periodically trim caches to prevent unbounded memory growth
       trimCaches();
     }).catch((error) => {
-      // FIX #1: Reset saveQueue to a new resolved promise on error
+      // Reset saveQueue on error to allow subsequent saves
       console.error('[UK Test Tracker] Save queue error:', error);
       saveQueue = Promise.resolve();
     });
@@ -668,7 +670,7 @@
     }, 2500);
   }
 
-  // FIX #8: Unified debounced save function (consolidates competing timers)
+  // Debounced save function to consolidate rapid saves
   function debouncedSave(questionData) {
     // Store pending save data
     pendingSave = questionData;
@@ -687,8 +689,7 @@
     }, DEBOUNCE_DELAY);
   }
 
-  // FIX #10: Flush pending saves (for beforeunload)
-  // Simplified to use only chrome.storage.session
+  // Flush pending saves before page unload (stored in chrome.storage.session for recovery)
   const PENDING_SAVE_MAX_LIMIT = 50;
 
   function flushPendingSave() {
@@ -735,8 +736,7 @@
                           checkButton.classList.contains('check') ||
                           checkButton.id?.includes('check'))) {
 
-        // FIX #8: Single unified capture attempt with debounce
-        // The MutationObserver is primary; this is backup
+        // Backup capture attempt (MutationObserver is primary)
         setTimeout(() => {
           const questionData = captureSingleQuestion();
           if (questionData && questionData.correctAnswer) {
@@ -755,7 +755,7 @@
           const target = mutation.target;
           // Check if a label got 'good' or 'bad' class (answer revealed)
           if (target.tagName === 'LABEL' && (target.classList.contains('good') || target.classList.contains('bad'))) {
-            // FIX #5 & #8: Track timeout for cleanup and use unified debounce
+            // Track timeout for cleanup
             if (observerTimeout) {
               clearTimeout(observerTimeout);
             }
@@ -774,8 +774,7 @@
       }
     });
 
-    // FIX: Observe narrower quiz area to reduce mutation processing overhead
-    // Prefer specific quiz container over broader selectors
+    // Observe narrower quiz area to reduce mutation processing overhead
     const quizArea = document.querySelector('.container_question')?.parentElement ||
                      document.querySelector('.main-content') ||
                      document.body;
@@ -795,7 +794,7 @@
       mutationObserver = null;
     }
 
-    // FIX #5: Clear observer timeout
+    // Clear observer timeout
     if (observerTimeout) {
       clearTimeout(observerTimeout);
       observerTimeout = null;
@@ -806,15 +805,14 @@
       saveTimeout = null;
     }
 
-    // FIX #6: Remove message listener
+    // Remove message listener
     if (messageListener) {
       chrome.runtime.onMessage.removeListener(messageListener);
       messageListener = null;
     }
   }
 
-  // FIX #10: Register cleanup on page unload with pending save flush
-  // FIX: Use AbortController to prevent listener accumulation on script re-injection
+  // Register cleanup on page unload with pending save flush
   window.addEventListener('beforeunload', function() {
     flushPendingSave();
     cleanup();
@@ -825,7 +823,6 @@
   }, { signal: abortController.signal });
 
   // Check for pending saves from previous page load
-  // Simplified to use only chrome.storage.session
   function processPendingSaves() {
     if (!isExtensionContextValid()) {
       return;
@@ -885,10 +882,7 @@
   setupMutationObserver();
   processPendingSaves();
 
-  // FIX #6: Store message listener reference for cleanup
-  // FIX #3 & #24: Add lastError checks to message handler
-  // FIX: Added sender validation to prevent malicious websites from extracting data
-  // FIX: Added context validation to handle extension reload gracefully
+  // Message listener with context and sender validation
   messageListener = function(request, sender, sendResponse) {
     // Check extension context before responding
     if (!isExtensionContextValid()) {
@@ -915,7 +909,7 @@
       return true; // Keep channel open for async response
     } else if (request.action === 'getStatus') {
       sendResponse({ active: true, testName: testName });
-      return false; // FIX #24: Synchronous response doesn't need true
+      return false; // Synchronous response
     }
   };
   chrome.runtime.onMessage.addListener(messageListener);

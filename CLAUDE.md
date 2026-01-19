@@ -14,13 +14,19 @@ This is a Chrome Extension (Manifest V3) that tracks quiz answers on the Life in
 - Extracts question text, user answer, correct answer, and timestamps
 - Saves to `chrome.storage.local` with session management (2-hour session window)
 
-**Popup (`popup.html` + `popup.js`)**: Extension UI showing:
+**Popup (`popup.html` + `shared.js`)**: Extension UI showing:
 - Statistics (total/correct/incorrect counts)
 - Session list and question review tabs
 - Export functions (JSON and CSV with UTF-8 BOM for Excel)
 - Data clearing functionality
 
-**Styles (`content.css`)**: Notification toast for tracking feedback on the quiz page.
+**Side Panel (`sidepanel.html` + `shared.js`)**: Same functionality as popup but in Chrome's side panel.
+
+**Shared Module (`shared.js`)**: Extracted shared code for popup and sidepanel UIs.
+
+**Export Worker (`csv-export-worker.js`)**: Web Worker for large CSV exports to prevent UI freezing.
+
+**Styles**: Notification toast styles are embedded in `content.js` using Shadow DOM for CSS isolation.
 
 ## Key Implementation Details
 
@@ -40,5 +46,8 @@ No automated test framework. Manual testing requires:
 ## Chrome Extension APIs Used
 
 - `chrome.storage.local` - Persistent data storage
+- `chrome.storage.session` - Session-scoped storage for pending saves recovery
+- `chrome.storage.onChanged` - Real-time storage change notifications
 - `chrome.runtime.onMessage` - Communication between content script and popup
+- `chrome.sidePanel` - Side panel API for alternative UI
 - Content scripts auto-inject via `manifest.json` matches

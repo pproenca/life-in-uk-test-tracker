@@ -4,6 +4,8 @@
 
 'use strict';
 
+// SYNC: This function is duplicated in shared.js
+// Workers cannot import from main thread - keep both versions in sync
 /**
  * Format a timestamp to a locale string
  * @param {string} timestamp
@@ -24,6 +26,8 @@ function formatDate(timestamp) {
   }
 }
 
+// SYNC: This function is duplicated in shared.js
+// Workers cannot import from main thread - keep both versions in sync
 /**
  * Convert sessions array to CSV string
  * @param {Array} sessions

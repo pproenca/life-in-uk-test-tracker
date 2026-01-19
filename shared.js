@@ -1,5 +1,5 @@
 // Life in UK Test Tracker - Shared Module
-// FIX #11: Extracted shared code from popup.js and sidepanel.js
+// Extracted shared code for popup.js and sidepanel.js
 
 (function(window) {
   'use strict';
@@ -81,8 +81,6 @@
 
     fill.style.width = Math.min(percentage, 100) + '%';
   }
-
-  // FIX: Removed refreshIntervalId - polling replaced with storage.onChanged listener
 
   // Web Worker for large CSV exports (threshold: 500 questions)
   const WORKER_EXPORT_THRESHOLD = 500;
@@ -167,12 +165,14 @@
     return sessions.reduce((sum, s) => sum + (s.questions?.length || 0), 0);
   }
 
-  // FIX #7: Track storage change listener for cleanup
+  // Track storage change listener for cleanup
   let storageChangeListener = null;
 
-  // FIX #12: Track last rendered hash to enable incremental updates
+  // Track last rendered hash to enable incremental updates
   let lastRenderedHash = null;
 
+  // SYNC: This function is duplicated in csv-export-worker.js
+  // Workers cannot import from main thread - keep both versions in sync
   // Date formatting utility - DRY helper for date validation and formatting
   function formatDate(timestamp, options = {}) {
     const fallback = options.fallback || 'Unknown';
@@ -777,6 +777,8 @@
     });
   }
 
+  // SYNC: This function is duplicated in csv-export-worker.js
+  // Workers cannot import from main thread - keep both versions in sync
   function convertToCSV(sessions) {
     const rows = [['Test Name', 'Question Number', 'Question', 'Your Answer', 'Correct Answer', 'Result', 'Type', 'Date']];
 
