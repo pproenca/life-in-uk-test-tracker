@@ -642,11 +642,19 @@
 
       // Escape key to close modal
       document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modalOverlay.classList.contains('show')) {
-          hideModal();
-          if (modalResolve) {
-            modalResolve(false);
-            modalResolve = null;
+        if (e.key === 'Escape') {
+          // Close confirm modal if open
+          if (modalOverlay.classList.contains('show')) {
+            hideModal();
+            if (modalResolve) {
+              modalResolve(false);
+              modalResolve = null;
+            }
+          }
+          // Close onboarding modal if open
+          const onboardingModal = document.getElementById('onboarding-modal');
+          if (onboardingModal && onboardingModal.classList.contains('show')) {
+            completeOnboarding();
           }
         }
       });
@@ -720,6 +728,22 @@
     const clearFilterBtn = document.getElementById('clear-session-filter');
     if (clearFilterBtn) {
       clearFilterBtn.addEventListener('click', clearSessionFilter);
+    }
+
+    // Onboarding dismiss button
+    const onboardingDismiss = document.getElementById('onboarding-dismiss');
+    if (onboardingDismiss) {
+      onboardingDismiss.addEventListener('click', completeOnboarding);
+    }
+
+    // Onboarding modal overlay click to close
+    const onboardingOverlay = document.getElementById('onboarding-modal');
+    if (onboardingOverlay) {
+      onboardingOverlay.addEventListener('click', function(e) {
+        if (e.target === onboardingOverlay) {
+          completeOnboarding();
+        }
+      });
     }
 
     // Keyboard shortcuts
@@ -840,6 +864,47 @@
     }
     escapeEl.textContent = String(text);
     return escapeEl.innerHTML;
+  }
+
+  // Onboarding modal functions
+  async function checkAndShowOnboarding() {
+    try {
+      const result = await storageGet(['onboardingComplete']);
+      // Show onboarding only if flag is explicitly false (fresh install)
+      // undefined means existing user (pre-onboarding) - don't show
+      if (result.onboardingComplete === false) {
+        showOnboardingModal();
+      }
+    } catch (e) {
+      console.error('[UK Test Tracker] Error checking onboarding:', e);
+    }
+  }
+
+  function showOnboardingModal() {
+    const modal = document.getElementById('onboarding-modal');
+    if (modal) {
+      modal.classList.add('show');
+      // Focus the dismiss button for accessibility
+      const dismissBtn = document.getElementById('onboarding-dismiss');
+      if (dismissBtn) dismissBtn.focus();
+    }
+  }
+
+  function hideOnboardingModal() {
+    const modal = document.getElementById('onboarding-modal');
+    if (modal) {
+      modal.classList.remove('show');
+    }
+  }
+
+  async function completeOnboarding() {
+    try {
+      await storageSet({ onboardingComplete: true });
+      hideOnboardingModal();
+    } catch (e) {
+      console.error('[UK Test Tracker] Error completing onboarding:', e);
+      hideOnboardingModal(); // Still hide the modal
+    }
   }
 
   // Modal helper functions
@@ -1062,6 +1127,9 @@
   function init() {
     // FIX: Show skeleton immediately for faster perceived loading
     renderSkeleton();
+
+    // Check and show onboarding for first-time users
+    checkAndShowOnboarding();
 
     // Check storage quota and show warning if approaching limit
     checkStorageQuota();

@@ -114,6 +114,42 @@
   <!-- Success Toast -->
   <div class="success-toast" id="success-toast" role="status" aria-live="polite"></div>
 
+  <!-- Onboarding Modal -->
+  <div class="modal-overlay" id="onboarding-modal" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+    <div class="modal onboarding-modal">
+      <div class="onboarding-header">
+        <img src="icon48.png" alt="" class="onboarding-icon" aria-hidden="true">
+        <div class="onboarding-title" id="onboarding-title">Welcome to Life in UK Test Tracker!</div>
+      </div>
+      <div class="onboarding-steps">
+        <div class="onboarding-step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <div class="step-title">Practice on the website</div>
+            <div class="step-description">Go to lifeintheuktestweb.co.uk and take practice tests</div>
+          </div>
+        </div>
+        <div class="onboarding-step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <div class="step-title">Answer questions</div>
+            <div class="step-description">Click "Check" after each question - we'll automatically track your answers</div>
+          </div>
+        </div>
+        <div class="onboarding-step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <div class="step-title">Review &amp; Export</div>
+            <div class="step-description">See your stats, review mistakes, and export data for AI-powered analysis</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-primary" id="onboarding-dismiss">Get Started</button>
+      </div>
+    </div>
+  </div>
+
   <script src="shared.js"></script>
   <script src="entry.js"></script>
 </body>

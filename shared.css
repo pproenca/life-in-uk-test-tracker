@@ -546,6 +546,84 @@ button:focus:not(:focus-visible) {
   font-size: 13px;
 }
 
+/* Onboarding modal styles */
+.onboarding-modal {
+  max-width: 360px;
+  text-align: center;
+}
+
+.onboarding-header {
+  margin-bottom: 20px;
+}
+
+.onboarding-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+}
+
+.onboarding-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.onboarding-steps {
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.onboarding-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.onboarding-step:last-child {
+  margin-bottom: 0;
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.step-content {
+  flex: 1;
+  padding-top: 2px;
+}
+
+.step-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.step-description {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.onboarding-modal .modal-actions {
+  justify-content: center;
+}
+
+.onboarding-modal .btn-primary {
+  min-width: 140px;
+}
+
 /* Undo toast styles */
 .undo-toast {
   position: fixed;
@@ -1066,5 +1144,22 @@ button.loading::after {
 
   .storage-warning-banner.critical .storage-usage-fill {
     background: #f87171;
+  }
+
+  /* Dark mode onboarding */
+  .onboarding-title {
+    color: #e5e5e5;
+  }
+
+  .step-title {
+    color: #e5e5e5;
+  }
+
+  .step-description {
+    color: #a3a3a3;
+  }
+
+  .step-number {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
   }
 }

@@ -1,5 +1,13 @@
 // Life in UK Test Tracker - Service Worker
 
+// Detect first-time installation for onboarding
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === 'install') {
+    // Set flag to show onboarding modal on first popup/sidepanel open
+    chrome.storage.local.set({ onboardingComplete: false });
+  }
+});
+
 // Enable side panel to open when clicking the extension icon
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
   .catch((error) => {
