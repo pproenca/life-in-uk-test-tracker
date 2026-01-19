@@ -29,6 +29,23 @@ function formatDate(timestamp) {
 // SYNC: This function is duplicated in shared.js
 // Workers cannot import from main thread - keep both versions in sync
 /**
+ * Generate timestamp suffix for export filenames (snake_case format)
+ * @returns {string} e.g., "_2026_01_19_14_30_45"
+ */
+function getTimestampSuffix() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  return `_${year}_${month}_${day}_${hours}_${minutes}_${seconds}`;
+}
+
+// SYNC: This function is duplicated in shared.js
+// Workers cannot import from main thread - keep both versions in sync
+/**
  * Convert sessions array to CSV string
  * @param {Array} sessions
  * @returns {string}
@@ -90,13 +107,13 @@ self.onmessage = function(event) {
     switch (type) {
       case 'csv':
         result = convertToCSV(sessions);
-        filename = 'uk-test-tracker-data.csv';
+        filename = `uk-test-tracker-data${getTimestampSuffix()}.csv`;
         mimeType = 'text/csv;charset=utf-8';
         break;
 
       case 'json':
         result = convertToJSON(sessions);
-        filename = 'uk-test-tracker-data.json';
+        filename = `uk-test-tracker-data${getTimestampSuffix()}.json`;
         mimeType = 'application/json';
         break;
 

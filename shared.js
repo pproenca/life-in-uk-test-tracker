@@ -189,6 +189,20 @@
     }
   }
 
+  // SYNC: This function is duplicated in csv-export-worker.js
+  // Workers cannot import from main thread - keep both versions in sync
+  // Timestamp suffix for export filenames (snake_case format)
+  function getTimestampSuffix() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    return `_${year}_${month}_${day}_${hours}_${minutes}_${seconds}`;
+  }
+
   // PERF: Sorted questions cache for O(1) timeline rendering
   let sortedQuestionsCache = new Map(); // sessionId → {sorted, count, lastUpdated}
 
@@ -538,7 +552,7 @@
             downloadFile(data, filename, mimeType);
           } else {
             const dataStr = JSON.stringify(sessions, null, 2);
-            downloadFile(dataStr, 'uk-test-tracker-data.json', 'application/json');
+            downloadFile(dataStr, `uk-test-tracker-data${getTimestampSuffix()}.json`, 'application/json');
           }
           showSuccessToast('Data exported');
         } catch (e) {
@@ -566,7 +580,7 @@
             downloadFile(data, filename, mimeType);
           } else {
             const csvData = convertToCSV(sessions);
-            downloadFile(csvData, 'uk-test-tracker-data.csv', 'text/csv;charset=utf-8');
+            downloadFile(csvData, `uk-test-tracker-data${getTimestampSuffix()}.csv`, 'text/csv;charset=utf-8');
           }
           showSuccessToast('CSV exported');
         } catch (e) {
