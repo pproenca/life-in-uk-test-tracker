@@ -16,6 +16,12 @@
   let shadowRoot = null;
   let notificationElement = null;
 
+  // Focus mode state and toolbar
+  let focusModeEnabled = false;
+  let toolbarHost = null;
+  let toolbarShadow = null;
+  let focusModeStyleElement = null;
+
   // Returns CSS styles for the notification (moved from content.css)
   function getNotificationStyles() {
     return `
@@ -85,6 +91,255 @@
         }
       }
     `;
+  }
+
+  // Returns CSS styles for focus mode (injected into page, not Shadow DOM)
+  function getFocusModeStyles() {
+    return `
+      /* Focus Mode - Hide distracting elements */
+      body.uk-test-focus-mode header.elementor-location-header,
+      body.uk-test-focus-mode footer.elementor-location-footer,
+      body.uk-test-focus-mode [data-id="6d15d5e"],
+      body.uk-test-focus-mode iframe[title*="Advertisement"],
+      body.uk-test-focus-mode .ai-viewport-3,
+      body.uk-test-focus-mode .elementor-widget-sidebar,
+      body.uk-test-focus-mode aside {
+        display: none !important;
+      }
+
+      /* Expand quiz area to full width */
+      body.uk-test-focus-mode .elementor-location-single,
+      body.uk-test-focus-mode [data-id="5ef2d2e"] {
+        max-width: 900px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+      }
+
+      /* Ensure main content takes full width */
+      body.uk-test-focus-mode .elementor-section-wrap > .elementor-section {
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+      }
+    `;
+  }
+
+  // Returns CSS styles for the focus mode toolbar (inside Shadow DOM)
+  function getToolbarStyles() {
+    return `
+      .toolbar {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        gap: 8px;
+        z-index: 2147483646;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+
+      .toolbar-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 14px;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .toolbar-btn:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+      }
+
+      .toolbar-btn:active {
+        transform: scale(0.97);
+      }
+
+      .focus-btn {
+        background: rgba(59, 130, 246, 0.9);
+        color: white;
+      }
+
+      .focus-btn:hover {
+        background: rgba(37, 99, 235, 0.95);
+      }
+
+      .focus-btn.active {
+        background: rgba(16, 185, 129, 0.9);
+      }
+
+      .focus-btn.active:hover {
+        background: rgba(5, 150, 105, 0.95);
+      }
+
+      .exams-btn {
+        background: rgba(107, 114, 128, 0.9);
+        color: white;
+      }
+
+      .exams-btn:hover {
+        background: rgba(75, 85, 99, 0.95);
+      }
+
+      .btn-icon {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .toolbar-btn {
+          transition: none;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .toolbar {
+          bottom: 10px;
+          right: 10px;
+          flex-direction: column;
+        }
+
+        .toolbar-btn {
+          padding: 8px 12px;
+          font-size: 12px;
+        }
+      }
+    `;
+  }
+
+  // Inject focus mode styles into the page
+  function injectFocusModeStyles() {
+    if (focusModeStyleElement) return;
+
+    focusModeStyleElement = document.createElement('style');
+    focusModeStyleElement.id = 'uk-test-tracker-focus-mode-styles';
+    focusModeStyleElement.textContent = getFocusModeStyles();
+    document.head.appendChild(focusModeStyleElement);
+  }
+
+  // SVG icons for toolbar buttons
+  const ICONS = {
+    eyeOpen: `<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`,
+    eyeClosed: `<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`,
+    arrowRight: `<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`
+  };
+
+  // Create focus mode toolbar with Shadow DOM
+  function createFocusModeToolbar() {
+    if (toolbarHost && document.body.contains(toolbarHost)) {
+      return;
+    }
+
+    // Inject focus mode styles into the page
+    injectFocusModeStyles();
+
+    // Create host element
+    toolbarHost = document.createElement('div');
+    toolbarHost.id = 'uk-test-tracker-toolbar';
+
+    // Attach shadow DOM
+    toolbarShadow = toolbarHost.attachShadow({ mode: 'open' });
+
+    // Inject styles
+    const styleSheet = new CSSStyleSheet();
+    styleSheet.replaceSync(getToolbarStyles());
+    toolbarShadow.adoptedStyleSheets = [styleSheet];
+
+    // Create toolbar container
+    const toolbar = document.createElement('div');
+    toolbar.className = 'toolbar';
+    toolbar.setAttribute('role', 'toolbar');
+    toolbar.setAttribute('aria-label', 'Quiz tools');
+
+    // Focus mode toggle button
+    const focusBtn = document.createElement('button');
+    focusBtn.className = 'toolbar-btn focus-btn';
+    focusBtn.setAttribute('aria-pressed', 'false');
+    focusBtn.setAttribute('title', 'Toggle Focus Mode - hide distractions');
+    focusBtn.innerHTML = `${ICONS.eyeOpen}<span>Focus</span>`;
+    focusBtn.addEventListener('click', () => toggleFocusMode());
+
+    // Exams navigation button
+    const examsBtn = document.createElement('button');
+    examsBtn.className = 'toolbar-btn exams-btn';
+    examsBtn.setAttribute('title', 'Go to Exams page');
+    examsBtn.innerHTML = `<span>Exams</span>${ICONS.arrowRight}`;
+    examsBtn.addEventListener('click', navigateToExams);
+
+    toolbar.appendChild(focusBtn);
+    toolbar.appendChild(examsBtn);
+    toolbarShadow.appendChild(toolbar);
+
+    document.body.appendChild(toolbarHost);
+
+    // Load saved focus mode state
+    loadFocusModeState();
+  }
+
+  // Toggle focus mode on/off
+  function toggleFocusMode(enabled) {
+    // If no argument, toggle current state
+    if (typeof enabled !== 'boolean') {
+      enabled = !focusModeEnabled;
+    }
+
+    focusModeEnabled = enabled;
+    document.body.classList.toggle('uk-test-focus-mode', enabled);
+
+    // Update button state
+    if (toolbarShadow) {
+      const focusBtn = toolbarShadow.querySelector('.focus-btn');
+      if (focusBtn) {
+        focusBtn.classList.toggle('active', enabled);
+        focusBtn.setAttribute('aria-pressed', enabled.toString());
+        focusBtn.innerHTML = `${enabled ? ICONS.eyeClosed : ICONS.eyeOpen}<span>Focus</span>`;
+        focusBtn.setAttribute('title', enabled ? 'Exit Focus Mode' : 'Toggle Focus Mode - hide distractions');
+      }
+    }
+
+    // Persist preference
+    saveFocusModeState(enabled);
+
+    console.log(`[UK Test Tracker] Focus mode ${enabled ? 'enabled' : 'disabled'}`);
+  }
+
+  // Save focus mode state to storage
+  function saveFocusModeState(enabled) {
+    if (!isExtensionContextValid()) return;
+
+    chrome.storage.local.set({ focusModeEnabled: enabled }, () => {
+      if (chrome.runtime.lastError) {
+        console.debug('[UK Test Tracker] Could not save focus mode state:', chrome.runtime.lastError.message);
+      }
+    });
+  }
+
+  // Load focus mode state from storage
+  function loadFocusModeState() {
+    if (!isExtensionContextValid()) return;
+
+    chrome.storage.local.get(['focusModeEnabled'], (result) => {
+      if (chrome.runtime.lastError) {
+        console.debug('[UK Test Tracker] Could not load focus mode state:', chrome.runtime.lastError.message);
+        return;
+      }
+
+      if (result.focusModeEnabled === true) {
+        toggleFocusMode(true);
+      }
+    });
+  }
+
+  // Navigate to exams page
+  function navigateToExams() {
+    window.location.href = 'https://lifeintheuktestweb.co.uk/exams/';
   }
 
   // Creates or returns the Shadow DOM container for notifications
@@ -810,6 +1065,22 @@
       chrome.runtime.onMessage.removeListener(messageListener);
       messageListener = null;
     }
+
+    // Remove toolbar
+    if (toolbarHost && toolbarHost.parentNode) {
+      toolbarHost.parentNode.removeChild(toolbarHost);
+      toolbarHost = null;
+      toolbarShadow = null;
+    }
+
+    // Remove focus mode styles
+    if (focusModeStyleElement && focusModeStyleElement.parentNode) {
+      focusModeStyleElement.parentNode.removeChild(focusModeStyleElement);
+      focusModeStyleElement = null;
+    }
+
+    // Remove focus mode class from body
+    document.body.classList.remove('uk-test-focus-mode');
   }
 
   // Register cleanup on page unload with pending save flush
@@ -881,6 +1152,9 @@
   setupCheckButtonListener();
   setupMutationObserver();
   processPendingSaves();
+
+  // Initialize focus mode toolbar
+  createFocusModeToolbar();
 
   // Message listener with context and sender validation
   messageListener = function(request, sender, sendResponse) {
